@@ -51,7 +51,9 @@ class HogVideoController {
 
         int applyDetections(Mat frame, Mat &detectionOut);
 
+        void printByCircleMethod(Mat &frame, vector<Vec3f> circleDetections);
+
     public:
         HogVideoController(fs::path videoPath, fs::path outPath);
-        void startDetection();
+        void startDetection(bool makeCircles = false);
 };
