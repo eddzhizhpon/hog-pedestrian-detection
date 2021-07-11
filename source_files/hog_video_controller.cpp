@@ -2,9 +2,19 @@
 
 HogVideoController::HogVideoController(fs::path videoPath, fs::path outPath){
     this->videoPath = videoPath;
-    hog = HOGDescriptor(Size(64, 128), Size(16, 16), Size(8, 8), Size(8, 8), 9, 1);
-    hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
-    //"../resources/peatones_video_3.mp4"
+
+    winSize = 16;
+    paddingSize = 128;
+
+    // Instancia a la clase HOGDescriptor.
+    hog = HOGDescriptor( Size(64, 128), Size(16, 16), Size(8, 8), Size(8, 8), 9, 1 );
+    
+    // Carga de la máquina de soporte vectorial ya entrenada 
+    // por OpenCV
+    hog.setSVMDetector( HOGDescriptor::getDefaultPeopleDetector() );
+    cout << hog.svmDetector.size() << endl;
+    cout << hog.getDescriptorSize() << endl;
+    
     video = VideoCapture(videoPath.u8string());
     this->outPath = outPath;
 
@@ -33,8 +43,11 @@ void HogVideoController::takeScreenshot(Mat frame, Rect &r, string idName) {
     int w = br.x - tl.x;
     int h = br.y - tl.y;
 
+    // Valida que el tamaño de la captura no exceda 
+    // el tamaño del frame original.
     w = getMaxSize(w, tl.x, frame.cols);
     h = getMaxSize(h, tl.y, frame.rows);
+
     Rect frameRect(tl.x, tl.y, w, h);
     Mat image = frame(frameRect);
     string name = idName + ".jpg";
@@ -44,7 +57,10 @@ void HogVideoController::takeScreenshot(Mat frame, Rect &r, string idName) {
 
 int HogVideoController::applyDetections(Mat frame, Mat &detectionOut) {
     vector<Rect> detectionList;
-    hog.detectMultiScale(frame, detectionList, 0, Size(winSize, winSize), Size(paddingSize, paddingSize), 1.05, 2, false);
+    
+    // Detección de peatones usando HOG Descriptor
+    hog.detectMultiScale(frame, detectionList, 0, Size(winSize, winSize), 
+        Size(paddingSize, paddingSize), 1.05, 2, false);
 
     detectionOut = frame.clone();
 
@@ -63,11 +79,14 @@ int HogVideoController::applyDetections(Mat frame, Mat &detectionOut) {
         w = r.width;
         h = r.height;
 
-        takeScreenshot( frame, r, ( to_string( imageIdToSave ) + "_" + to_string( nDetections ) ) );
+        takeScreenshot( frame, r, ( "frame_" + to_string(frameIdToSave) + "_image_" 
+                            + to_string( imageIdToSave ) + "_ndetec_" 
+                            + to_string( nDetections ) ) );
         rectangle(detectionOut, r.tl(), r.br(), Scalar(10, 10, 237), 2);
         
         imageIdToSave++;
     }
+    frameIdToSave++;
 
     return nDetections;
 }
@@ -94,7 +113,7 @@ void HogVideoController::startDetection(){
                 imshow("Magnitud", magnitud);
                 imshow("Angulo", angulo);
                 imshow("Detecciones", frameWithDetection);
-
+                
                 if (waitKey(23) == 27){
                     break;
                 }

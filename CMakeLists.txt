@@ -19,11 +19,20 @@ add_executable(${PROJECT_NAME}
   "source_files/hog_video_controller.cpp"
 )
 
-target_link_libraries(${PROJECT_NAME} 
-  ${OpenCV_LIBS} 
-  ${CMAKE_THREAD_LIBS_INIT} 
-  stdc++fs
-)
+if (UNIX)
+  target_link_libraries(${PROJECT_NAME} 
+    ${OpenCV_LIBS} 
+    ${CMAKE_THREAD_LIBS_INIT} 
+    stdc++fs
+  )
+endif (UNIX)
+
+if (WIN32) 
+  target_link_libraries(${PROJECT_NAME} 
+    ${OpenCV_LIBS} 
+    ${CMAKE_THREAD_LIBS_INIT}
+  )
+endif(WIN32)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

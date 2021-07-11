@@ -38,6 +38,7 @@ class HogVideoController {
         int winSize = 8;
         int paddingSize = 128;
         int imageIdToSave = 0;
+        int frameIdToSave = 0;
 
         VideoCapture video;
 
